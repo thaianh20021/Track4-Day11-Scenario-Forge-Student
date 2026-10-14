@@ -1,0 +1,60 @@
+{
+ "format": "avsim-studio/1",
+ "params": {
+  "cutT0": 5.0,
+  "cutDur": 2.4,
+  "cutV": 15.0,
+  "pedT0": 9.6,
+  "pedV": 1.45,
+  "busGo": 17.5,
+  "cutDs": -4.0,
+  "tgT": 0.9,
+  "mu": 0.8,
+  "cutGap": null,
+  "cutBrake": 0.0,
+  "pedGap": null,
+  "pedLook": 0,
+  "civil": false
+ },
+ "policy": {
+  "v0": 12.5,
+  "T": 1.6,
+  "a": 1.4,
+  "b": 2.0,
+  "s0": 2.5,
+  "cautionV": 7.5,
+  "cautionRange": 55.0,
+  "pedBuffer": 2.5,
+  "cutinLat": 2.15
+ },
+ "hazards": [
+  {
+   "type": "bike",
+   "lane": "E2",
+   "x": 60.0,
+   "d": 0.0,
+   "v": 5.0,
+   "swerve": 2.1,
+   "swDur": 2.0,
+   "t0": 0.0,
+   "trig": 14.0
+  }
+ ],
+ "ego": "planner",
+ "space": {
+  "h0_x": [
+   45.0,
+   80.0
+  ],
+  "h0_swerve": [
+   1.8,
+   2.3
+  ],
+  "h0_trig": [
+   10.0,
+   16.0
+  ]
+ },
+ "exposure": 0.03,
+ "why": "Xe đạp đi ở làn E2 (v=5 m/s) bất ngờ lạng sang trái 1.8-2.3 m lấn vào làn E1 của xe ta để tránh chướng ngại vật/cửa xe mở: nghiên cứu quan sát xe hai bánh đô thị ghi nhận tần suất gặp tình huống lạng gấp khoảng 0.03 lần/chuyến; gia tốc ngang tối đa đạt ~2.8 m/s2 (dưới ngưỡng trượt 3.0 m/s2 đảm bảo khả thi); khoảng cách kích hoạt 10-16 m thử thách phản ứng phanh khẩn cấp của planner."
+}
