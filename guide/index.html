@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 11: Scenario Forge — Hướng Dẫn & Giải Mã Trực Quan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.12);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-coral: #f43f5e;
+      --accent-amber: #f59e0b;
+      --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    /* Header & Navigation */
+    header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(9, 13, 22, 0.85);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-group { display: flex; align-items: center; gap: 0.8rem; }
+    .badge {
+      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+    .logo-group h1 { font-size: 1.35rem; font-weight: 700; color: #fff; }
+
+    nav { display: flex; gap: 0.5rem; }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 0.6rem;
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-btn.active {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* Container */
+    .container { max-width: 1240px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    .hero-banner {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.2) 100%);
+      border: 1px solid var(--card-border);
+      border-radius: 1.25rem;
+      padding: 2.5rem 2rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; width: 300px; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1));
+      pointer-events: none;
+    }
+    .hero-banner h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.6rem; }
+    .hero-banner p { color: var(--text-muted); font-size: 1.05rem; max-width: 800px; }
+    .hero-tags { display: flex; gap: 0.75rem; margin-top: 1.2rem; flex-wrap: wrap; }
+    .tag {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      padding: 0.3rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .tag strong { color: var(--accent-cyan); }
+
+    /* Tab Content Panels */
+    .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Cards Grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card:hover {
+      border-color: var(--card-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Roadmaps */
+    .step-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--font-code);
+      margin-bottom: 0.8rem;
+    }
+    .step-badge.blue { background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+    .step-badge.cyan { background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .step-badge.green { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .step-badge.amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .step-badge.coral { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    .card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .card p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.55; margin-bottom: 1rem; }
+
+    .file-chip {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0.4rem 0.7rem;
+      border-radius: 0.5rem;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Accordion / Interactive Code Viewer */
+    .todo-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.9rem;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .todo-header {
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .todo-header:hover { background: rgba(255, 255, 255, 0.02); }
+    .todo-title { display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-size: 1.05rem; }
+    .todo-tag {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.3rem;
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+    }
+    .todo-chevron { transition: transform 0.25s ease; color: var(--text-muted); font-size: 0.8rem; }
+    .todo-item.open .todo-chevron { transform: rotate(180deg); }
+
+    .todo-body {
+      display: none;
+      padding: 0 1.5rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .todo-item.open .todo-body { display: block; }
+
+    .concept-box {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 0.6rem;
+      background: rgba(6, 182, 212, 0.07);
+      border-left: 3px solid var(--accent-cyan);
+      font-size: 0.92rem;
+    }
+    .concept-box strong { color: var(--accent-cyan); }
+
+    pre code {
+      display: block;
+      padding: 1rem;
+      border-radius: 0.6rem;
+      background: #060910;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    /* Sandbox Calculators */
+    .sandbox-panel {
+      margin-top: 1.2rem;
+      padding: 1.2rem;
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 0.75rem;
+    }
+    .sandbox-panel h4 { font-size: 0.95rem; color: #a5b4fc; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+    .control-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+    .control-row label { font-size: 0.85rem; color: var(--text-muted); min-width: 140px; }
+    .control-row input[type="range"] { flex: 1; accent-color: var(--primary); }
+    .control-row .val-disp { font-family: var(--font-code); font-size: 0.85rem; color: var(--accent-cyan); width: 60px; text-align: right; }
+    .calc-result {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 0.5rem;
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      color: var(--accent-green);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Tables */
+    .table-container { overflow-x: auto; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #94a3b8;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+      font-weight: 600;
+    }
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+    }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Metric Highlight Cards */
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.8rem;
+      padding: 1.25rem;
+    }
+    .metric-card .title { font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-card .value { font-size: 1.7rem; font-weight: 800; margin: 0.3rem 0; font-family: var(--font-code); }
+    .metric-card .desc { font-size: 0.8rem; color: #64748b; }
+
+    /* Q&A section */
+    .qa-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .qa-box h4 {
+      font-size: 1.05rem;
+      color: #38bdf8;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .qa-box p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; }
+    .qa-box ul { padding-left: 1.4rem; color: #cbd5e1; font-size: 0.92rem; margin-top: 0.5rem; }
+    .qa-box li { margin-bottom: 0.35rem; }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      border-top: 1px solid var(--card-border);
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-group">
+      <span class="badge">Track 4 · Day 11</span>
+      <h1>Scenario Forge — Lò Rèn Kịch Bản</h1>
+    </div>
+    <nav>
+      <button class="nav-btn active" data-tab="tab-roadmap">🗺️ Lộ Trình</button>
+      <button class="nav-btn" data-tab="tab-todos">🧩 10 TODO</button>
+      <button class="nav-btn" data-tab="tab-data">📊 Dữ Liệu Của Bạn</button>
+      <button class="nav-btn" data-tab="tab-viewer">🚗 Trình Xem 3D</button>
+      <button class="nav-btn" data-tab="tab-qa">🎓 Hỏi & Đáp Bảo Vệ</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <h2>Trung Tâm Hướng Dẫn & Giải Mã Trực Quan</h2>
+      <p>Bản giải thích trực quan, dễ hiểu từng bước mô phỏng, thuật toán săn tìm sự kiện hiếm (CEM & Importance Sampling), bộ lọc khả thi vật lý và kết quả thực nghiệm kiểm thử xe tự lái.</p>
+      <div class="hero-tags">
+        <span class="tag">MSSV: <strong>202602740</strong></span>
+        <span class="tag">Thị trấn: <strong>Thị trấn B</strong></span>
+        <span class="tag">Trạng thái: <strong>31/31 Test Passed (100% Green)</strong></span>
+        <span class="tag">Chính sách tối ưu: <strong>cutinLat = 3.0</strong></span>
+      </div>
+    </div>
+
+    <!-- TAB 1: ROADMAP -->
+    <section id="tab-roadmap" class="tab-panel active">
+      <div class="grid">
+        <div class="card">
+          <span class="step-badge blue">Bước 0</span>
+          <h3>Kiểm Tra Lõi Mô Phỏng</h3>
+          <p>Chạy mô phỏng batch K kịch bản cùng lúc trên numpy (~4 ms/kịch bản). Đảm bảo tính toán khớp từng bit với bản 3D JavaScript.</p>
+          <div class="file-chip">python run_all.py world ➔ world.json</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge cyan">Bước A</span>
+          <h3>Phát Lại Log vs Thế Giới Phản Ứng</h3>
+          <p>So sánh chạy planner trên log ghi sẵn (replay) và trong thế giới phản ứng (reactive). Lộ tẩy 94 va chạm đuôi là <strong>va chạm giả</strong> do xe sau không phanh.</p>
+          <div class="file-chip">python run_all.py replay ➔ replay.json</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge amber">Bước B</span>
+          <h3>Bộ Lọc Khả Thi Vật Lý (Feasibility)</h3>
+          <p>Loại bỏ kịch bản xe lạng quá độ bám lốp đường (&mu;g) hoặc người chạy nước rút (&gt; 2.5 m/s). Tránh thuật toán săn kịch bản phi thực tế.</p>
+          <div class="file-chip">lab11/feasible.py: is_feasible</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge green">Bước C1</span>
+          <h3>Monte Carlo Tự Nhiên (MC)</h3>
+          <p>Chạy 3.000 lần ngẫu nhiên. Chỉ thấy 1 va chạm (p = 3.33 &times; 10⁻⁴). Muốn đo chính xác &plusmn;20% cần gần 300.000 lần chạy!</p>
+          <div class="file-chip">python run_all.py mc ➔ mc.json</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge blue">Bước C2</span>
+          <h3>Săn Bằng Cross-Entropy (CEM)</h3>
+          <p>Tập trung mẫu vào vùng nguy hiểm: lọc top 10% kịch bản sát sạt va chạm (elite) để ép phân phối đề xuất q co dần về phía tai nạn.</p>
+          <div class="file-chip">python run_all.py hunt ➔ hunt.json</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge cyan">Bước C3</span>
+          <h3>Ước Lượng Importance Sampling (IS)</h3>
+          <p>Rút mẫu từ hỗn hợp phòng thủ 0.8&middot;CEM + 0.2&middot;Tự nhiên. Nhân trọng số w = p/q để ước lượng xác suất hiếm cực nhỏ (10⁻⁶) mà không cần triệu lần chạy.</p>
+          <div class="file-chip">python run_all.py estimate ➔ estimate.json</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge amber">Bước E</span>
+          <h3>Sửa Planner & Đánh Giá Độc Lập</h3>
+          <p>Thử 12 bộ thông số trên tập TRAIN, chọn bộ an toàn nhất bằng <code>choose_policy</code>, sau đó đo lại trên tập TEST hoàn toàn mới.</p>
+          <div class="file-chip">python run_all.py fix ➔ fix.json</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge coral">Bước G</span>
+          <h3>Rắc Rối Riêng: Xe Đạp Lạng Bất Ngờ</h3>
+          <p>Dựng tình huống xe đạp làn bên lạng vào làn xe ta để tránh chướng ngại vật cách 10–16 m. Đo va chạm với chính sách gốc vs bản sửa.</p>
+          <div class="file-chip">python run_all.py mine hazard.json ➔ mine.json</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: 10 TODOS -->
+    <section id="tab-todos" class="tab-panel">
+      <!-- TODO 1 -->
+      <div class="todo-item open">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 1</span>
+            <span><code>min_ttc(R)</code> — Thời Gian Tới Lúc Va Chạm Nhỏ Nhất (TTC)</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Đo mức độ suýt đâm va giữa xe ta và vật cản phía trước. Khe hở cản-đến-cản tính bằng <code>lon - 2.3 - leader_len/2</code>. TTC = Khe hở / (Vận tốc xe ta - Vận tốc xe trước). Nếu xe đã va chạm, trả về 0.
+          </div>
+          <pre><code># Vector hoá qua toàn bộ NF khung hình:
+rx = x_ldr - x_ego; rz = z_ldr - z_ego
+lon = rx * hx_ego + rz * hz_ego
+gap = np.maximum(0.0, lon - HALF_EGO - ldr_len / 2.0)
+dv = v_ego - v_ldr
+closing = valid_ldr & (dv > 0.1)
+ttc = np.where(closing, gap / safe_dv, np.inf)
+return np.where(crashed, 0.0, np.minimum(cap, ttc.min(axis=1)))</code></pre>
+          <!-- Interactive Sandbox -->
+          <div class="sandbox-panel">
+            <h4>🧮 Sandbox Thử Nghiệm TTC</h4>
+            <div class="control-row">
+              <label>Khoảng cách tâm (lon):</label>
+              <input type="range" id="sb1-lon" min="5" max="50" step="0.5" value="25" oninput="calcTTC()">
+              <span class="val-disp" id="sb1-lon-val">25 m</span>
+            </div>
+            <div class="control-row">
+              <label>Vận tốc chênh lệch (dv):</label>
+              <input type="range" id="sb1-dv" min="0" max="15" step="0.5" value="5" oninput="calcTTC()">
+              <span class="val-disp" id="sb1-dv-val">5 m/s</span>
+            </div>
+            <div class="calc-result">
+              <span>Khe hở bumper-to-bumper: <strong id="sb1-gap">20.4 m</strong></span>
+              <span>TTC: <strong id="sb1-ttc">4.08 s</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODO 2 -->
+      <div class="todo-item">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 2</span>
+            <span><code>contact_type(R, k, event)</code> — Phân Loại Vị Trí Va Chạm</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Chuyển đối tượng va chạm về hệ quy chiếu thân xe của xe ta. Dựa vào tọa độ dọc (lon) và ngang (lat): nếu ở trước đầu xe là <code>front</code>, sau đuôi xe là <code>rear</code>, còn lại là <code>side</code>.
+          </div>
+          <pre><code>lon = rx * hx + rz * hz
+lat = -rx * hz + rz * hx
+if lon > 2.3 and abs(lat) < 1.6:   return "front"
+elif lon < -2.3 and abs(lat) < 1.6: return "rear"
+else:                               return "side"</code></pre>
+        </div>
+      </div>
+
+      <!-- TODO 3 -->
+      <div class="todo-item">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 3</span>
+            <span><code>is_feasible(p)</code> — Kiểm Tra Tính Khả Thi Vật Lý</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Ngăn chặn việc mô phỏng những kịch bản phi thực tế (xe lạng ngang với lực vượt quá độ bám lốp &mu;g, hoặc người chạy nhanh hơn người bình thường).
+          </div>
+          <pre><code># 1. Gia tốc lạng ngang chuyển làn cosine 3.5m:
+a_lat = (math.pi / p["cutDur"]) ** 2 * 3.5 / 2.0
+if a_lat > p["mu"] * 9.81: return False
+# 2. Phanh sau khi vào làn vượt quá độ bám:
+if p["cutBrake"] > p["mu"] * 9.81: return False
+# 3. Người đi bộ chạy nước rút:
+if p["pedV"] > 2.5: return False
+# 4. Vận tốc xe cắt làn phi lý:
+if not (0.0 < p["cutV"] <= 22.0): return False
+return True</code></pre>
+        </div>
+      </div>
+
+      <!-- TODO 4 -->
+      <div class="todo-item">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 4</span>
+            <span><code>wilson_ci(k, n, z)</code> — Khoảng Tin Cậy Wilson Score</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Khi k = 0 (chưa gặp tai nạn nào), khoảng Gauss cổ điển bị sập thành [0, 0] (sai lầm nghiêm trọng). Công thức Wilson đảm bảo cận dưới = 0 nhưng cận trên &gt; 0, phản ánh trung thực rằng "chưa gặp không có nghĩa là xác suất bằng 0".
+          </div>
+          <pre><code>p = k / n; denom = 1.0 + (z ** 2) / n
+center = (p + (z ** 2) / (2.0 * n)) / denom
+half = (z / denom) * math.sqrt(p * (1.0 - p) / n + (z ** 2) / (4.0 * n ** 2))
+return (max(0.0, center - half), min(1.0, center + half))</code></pre>
+          <div class="sandbox-panel">
+            <h4>🧮 Sandbox Tính Khoảng Tin Cậy Wilson</h4>
+            <div class="control-row">
+              <label>Số vụ va chạm (k):</label>
+              <input type="range" id="sb4-k" min="0" max="20" step="1" value="0" oninput="calcWilson()">
+              <span class="val-disp" id="sb4-k-val">0</span>
+            </div>
+            <div class="control-row">
+              <label>Tổng số lượt thử (n):</label>
+              <input type="range" id="sb4-n" min="100" max="5000" step="100" value="3000" oninput="calcWilson()">
+              <span class="val-disp" id="sb4-n-val">3000</span>
+            </div>
+            <div class="calc-result">
+              <span>Tỷ lệ điểm p: <strong id="sb4-p">0.0000</strong></span>
+              <span>Khoảng Wilson 95%: <strong id="sb4-ci">[0.0000, 0.0013]</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODO 5 -->
+      <div class="todo-item">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 5</span>
+            <span><code>cem_update(Z, Bn, score, prev)</code> — Bước Cập Nhật Cross-Entropy</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Thuật toán săn kịch bản hiếm. Trong mỗi vòng, lấy top 10% kịch bản nguy hiểm nhất (elite) để cập nhật mean và std của phân phối đề xuất q, đồng thời duy trì độ lệch chuẩn sàn (min_std = 0.25) để trọng số không bị bùng nổ.
+          </div>
+          <pre><code>elite = np.argsort(-score, kind="stable")[:n_elite]
+mean = smooth * np.mean(Z[elite], axis=0) + (1.0 - smooth) * prev["mean"]
+std = np.maximum(min_std, smooth * np.std(Z[elite], axis=0) + (1.0 - smooth) * prev["std"])
+p_bin = np.clip(smooth * np.mean(Bn[elite], axis=0) + (1.0 - smooth) * prev["p_bin"], *p_clip)
+return dict(mean=mean, std=std, p_bin=p_bin, level=float(np.min(score[elite])))</code></pre>
+        </div>
+      </div>
+
+      <!-- TODO 6 & 7 -->
+      <div class="todo-item">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 6 & 7</span>
+            <span><code>log_weights</code> & <code>is_estimate</code> — Ước Lượng Importance Sampling</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Do rút mẫu từ phân phối thiên vị q (tập trung nhiều va chạm), ta phải bù trừ bằng trọng số w = p(u)/q(u) để trả về xác suất thật dưới phân phối tự nhiên. Hỗn hợp phòng thủ q = 0.8&middot;CEM + 0.2&middot;Natural đảm bảo w không vượt quá 1/0.2 = 5.
+          </div>
+          <pre><code># TODO 6: Trọng số logw = log p - log q
+log_q = np.logaddexp(math.log(1.0 - beta) + log_prop, math.log(beta) + log_p)
+return log_p - log_q
+
+# TODO 7: Ước lượng không chệch
+w = np.exp(logw)
+p = float(np.mean(w * y)) # KHÔNG chuẩn hoá theo sum(w) vì gây chệch ở n nhỏ
+se = float(np.std(w * y, ddof=1) / math.sqrt(n))
+ess = float(np.sum(w) ** 2 / np.sum(w ** 2)) # Cỡ mẫu hiệu dụng Kish</code></pre>
+        </div>
+      </div>
+
+      <!-- TODO 8 -->
+      <div class="todo-item">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 8</span>
+            <span><code>label_mode(R, k, event, contact_type)</code> — Gán Nhãn Kiểu Thất Bại</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Cây quyết định phân loại tai nạn theo thứ tự: Gặp người đi bộ P1 ➔ <code>crosswalk_block</code>; Bị tông đuôi ➔ <code>rear_ended</code>; Đâm xe C2 lách xe buýt (x &lt; 112m, v &lt; 6m/s) ➔ <code>bus_bypass</code>; Đâm C2 tình huống khác ➔ <code>cut_in</code>; Còn lại ➔ <code>other</code>.
+          </div>
+        </div>
+      </div>
+
+      <!-- TODO 9 & 10 -->
+      <div class="todo-item">
+        <div class="todo-header" onclick="toggleTodo(this)">
+          <div class="todo-title">
+            <span class="todo-tag">TODO 9 & 10</span>
+            <span><code>progress_metrics</code> & <code>choose_policy</code> — Sửa & Chọn Planner An Toàn</span>
+          </div>
+          <span class="todo-chevron">▼</span>
+        </div>
+        <div class="todo-body">
+          <div class="concept-box">
+            <strong>Bản chất:</strong> Một chính sách an toàn nhưng đứng im một chỗ là vô dụng. Ta chỉ xét các chính sách giữ lại ít nhất 95% quãng đường di chuyển của baseline, sau đó chọn chính sách có <strong>cận trên tỉ lệ thất bại fail_hi nhỏ nhất</strong> (đo độ an toàn bảo thủ, tránh ảo giác an toàn do may mắn).
+          </div>
+          <pre><code>min_prog = (1.0 - max_loss) * baseline_progress
+qual = [r for r in table if r.get("progress", 0.0) >= min_prog]
+if not qual: return None
+return min(qual, key=lambda r: (r["fail_hi"], -r["progress"]))</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: YOUR DATA -->
+    <section id="tab-data" class="tab-panel">
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="title">Tỷ Lệ Thất Bại Gốc (TEST)</div>
+          <div class="value" style="color: var(--accent-coral)">2.43 &times; 10⁻³</div>
+          <div class="desc">Chính sách ban đầu của đội</div>
+        </div>
+        <div class="metric-card">
+          <div class="title">Bản Sửa (cutinLat = 3.0)</div>
+          <div class="value" style="color: var(--accent-green)">5.94 &times; 10⁻⁶</div>
+          <div class="desc">Giảm nguy cơ va chạm hơn 400 lần!</div>
+        </div>
+        <div class="metric-card">
+          <div class="title">Quãng Đường Trung Bình</div>
+          <div class="value" style="color: var(--accent-cyan)">214.2 m</div>
+          <div class="desc">Không đổi (gốc 214.3 m, mất &lt; 0.05%)</div>
+        </div>
+        <div class="metric-card">
+          <div class="title">Rắc Rối Xe Đạp (avoidable)</div>
+          <div class="value" style="color: var(--accent-amber)">202 ➔ 77</div>
+          <div class="desc">Giảm gần 3 lần va chạm nguy hiểm</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 2rem;">
+        <h3>Kết Quả Ước Lượng Importance Sampling Qua 3 Seed (evidence/estimate.json)</h3>
+        <p>Bảng phân phối xác suất hiếm của các kiểu thất bại được tìm thấy:</p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Kiểu Thất Bại</th>
+                <th>Seed 0 (p)</th>
+                <th>Seed 1 (p)</th>
+                <th>Seed 2 (p)</th>
+                <th>Monte Carlo</th>
+                <th>Số Mẫu Va Chạm (hits)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>bus_bypass</strong> (Lách xe buýt)</td>
+                <td>3.59 &times; 10⁻⁴</td>
+                <td>1.26 &times; 10⁻³</td>
+                <td>6.94 &times; 10⁻⁴</td>
+                <td>3.33 &times; 10⁻⁴</td>
+                <td>38 – 51 hits</td>
+              </tr>
+              <tr>
+                <td><strong>crosswalk_block</strong> (Chắn vạch người đi bộ)</td>
+                <td>2.70 &times; 10⁻⁶</td>
+                <td>1.43 &times; 10⁻⁶</td>
+                <td>7.51 &times; 10⁻⁶</td>
+                <td>0 hits (quá hiếm)</td>
+                <td>50 – 56 hits</td>
+              </tr>
+              <tr>
+                <td><strong>cut_in</strong> (Xe lấn làn)</td>
+                <td>0.0 (cận: 0.025)</td>
+                <td>0.0 (cận: 0.025)</td>
+                <td>0.0 (cận: 0.025)</td>
+                <td>0 hits</td>
+                <td>0 hits</td>
+              </tr>
+              <tr>
+                <td><strong>rear_ended</strong> (Bị đâm đuôi)</td>
+                <td>0.0 (cận: 0.025)</td>
+                <td>0.0 (cận: 0.025)</td>
+                <td>0.0 (cận: 0.025)</td>
+                <td>0 hits</td>
+                <td>0 hits</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>So Sánh Chi Tiết Chính Sách Trên Tập TEST Độc Lập (evidence/fix.json)</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Chỉ Số</th>
+                <th>Chính Sách Gốc (Baseline)</th>
+                <th>Chính Sách Được Chọn (cutinLat = 3.0)</th>
+                <th>Ý Nghĩa Thực Tế</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Tỷ lệ thất bại (fail)</strong></td>
+                <td style="color: var(--accent-coral)">2.43 &times; 10⁻³</td>
+                <td style="color: var(--accent-green)"><strong>5.94 &times; 10⁻⁶</strong></td>
+                <td>Bản sửa loại bỏ gần như triệt để va chạm lách xe buýt</td>
+              </tr>
+              <tr>
+                <td><strong>Cận trên thấy được (fail_hi_seen)</strong></td>
+                <td>5.43 &times; 10⁻³</td>
+                <td>1.45 &times; 10⁻⁵</td>
+                <td>Độ tin cậy 95% trên những kiểu có va chạm</td>
+              </tr>
+              <tr>
+                <td><strong>Quãng đường (progress)</strong></td>
+                <td>214.3 m</td>
+                <td>214.2 m</td>
+                <td>Xe chạy mượt mà, không bị chậm hay đứng ì</td>
+              </tr>
+              <tr>
+                <td><strong>Số khung hình phanh gấp (harsh)</strong></td>
+                <td>8.52 frames</td>
+                <td>8.04 frames</td>
+                <td>Ít phanh giật hơn, êm ái hơn cho hành khách</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: 3D VIEWER -->
+    <section id="tab-viewer" class="tab-panel">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3>Hướng Dẫn Mở & Tương Tác Với Trình Xem 3D</h3>
+        <p>Trình xem 3D chạy hoàn toàn offline không cần cài đặt hay kết nối mạng:</p>
+        <ol style="padding-left: 1.5rem; line-height: 1.8; color: #cbd5e1;">
+          <li>Mở trực tiếp file <code>viewer/index.html</code> bằng Chrome hoặc trình duyệt bất kỳ.</li>
+          <li>Chọn chương <strong>9 · phòng lab</strong> ở thanh menu trên cùng.</li>
+          <li>Kéo và thả file <code>evidence/viewer.json</code> từ máy bạn vào giữa cửa sổ trình duyệt.</li>
+          <li><strong>Quan sát:</strong> Mỗi chấm màu là một kịch bản đã thử (đậm dần theo vòng săn). Bấm vào chấm bất kỳ để xem xe chạy lại.</li>
+          <li><strong>Bóng mờ (ghost):</strong> Xe bóng mờ chạy cùng lúc biểu diễn xe ta với chính sách gốc, giúp so sánh ngay bản sửa tốt hơn thế nào.</li>
+        </ol>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <span class="step-badge coral">Chương 9</span>
+          <h3>Va chạm "Lách qua xe buýt" (bus_bypass)</h3>
+          <p>Xe buýt đỗ che khuất tầm nhìn. Xe C2 chầm chậm lách ra. Xe ta không nhìn thấy qua thân xe buýt và đâm vào góc xe C2.</p>
+          <div class="file-chip">evidence/shots/bus_bypass.jpg</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge amber">Chương 9</span>
+          <h3>Chặn lối người đi bộ (crosswalk_block)</h3>
+          <p>Người đi bộ P1 bước ra từ sau xe buýt. Xe ta phanh gấp, xe dừng hẳn nhưng mũi xe nằm đè lên vạch cản đường người đi bộ.</p>
+          <div class="file-chip">evidence/shots/crosswalk_block.jpg</div>
+        </div>
+
+        <div class="card">
+          <span class="step-badge green">Chương 10</span>
+          <h3>Rắc rối của bạn: Xe đạp lạng tránh vật cản</h3>
+          <p>Xe đạp ở làn E2 lạng sang trái 2.1m lấn vào làn xe ta cách 14m. Bản sửa mở rộng <code>cutinLat = 3.0</code> phát hiện sớm và phanh êm hơn.</p>
+          <div class="file-chip">evidence/shots/hazard_bike.jpg</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: Q&A DEFENSE GUIDE -->
+    <section id="tab-qa" class="tab-panel">
+      <div class="qa-box">
+        <h4>1. Tại sao phần lớn va chạm trong log phát lại (replay) là va chạm đuôi (rear), và vì sao đó là va chạm giả?</h4>
+        <p><strong>Trả lời:</strong> Trong phát lại log tĩnh, các xe xung quanh chỉ nhắm mắt bám theo đúng tọa độ thời gian đã ghi của người lái người thật. Khi planner của xe ta thận trọng hơn (phanh sớm hơn hoặc nhường đường), xe bám đuôi TG không phản ứng mà cứ thế lao tới tông vào đuôi xe ta. Trong môi trường mô phỏng phản ứng (reactive), xe sau dùng mô hình IDM thấy khoảng cách hẹp lại sẽ tự động phanh theo, do đó toàn bộ 94 vụ tông đuôi biến mất hoàn toàn.</p>
+      </div>
+
+      <div class="qa-box">
+        <h4>2. Tại sao phải dùng khoảng tin cậy Wilson thay vì khoảng chuẩn Gauss khi đếm va chạm Monte Carlo?</h4>
+        <p><strong>Trả lời:</strong> Với các sự kiện cực hiếm, khi n = 3.000 mà không thấy va chạm nào (k = 0), khoảng chuẩn Gauss tính ra p̂ = 0 và khoảng tin cậy [0, 0] — nghĩa là khẳng định xe "không bao giờ va chạm". Điều này hoàn toàn phi lý về mặt xác suất. Khoảng Wilson giải phương trình bậc hai đảm bảo rằng khi k = 0 thì cận trên vẫn lớn hơn 0 (với n = 3000, cận trên là ~0.00128), phản ánh đúng sự thật rằng rủi ro vẫn tồn tại.</p>
+      </div>
+
+      <div class="qa-box">
+        <h4>3. Tại sao cuộc săn CEM phải săn riêng cho từng kiểu thất bại mà không săn chung 1 lần?</h4>
+        <p><strong>Trả lời:</strong> Thuật toán Cross-Entropy có xu hướng "co cụm" (mode collapse) về kiểu va chạm dễ xảy ra nhất (ở đây là lách xe buýt bus_bypass). Nếu chỉ chạy một cuộc săn chung, toàn bộ phân phối đề xuất sẽ bị kéo sạch về bus_bypass và bỏ sót hoàn toàn các kiểu tai nạn tinh vi khác như chặn lối người qua đường (crosswalk_block).</p>
+      </div>
+
+      <div class="qa-box">
+        <h4>4. Vì sao fail_hi (cận trên 95%) của bản sửa lại lớn hơn fail của policy gốc dù bản sửa an toàn hơn thật?</h4>
+        <p><strong>Trả lời:</strong> Trên tập TEST, bản sửa an toàn đến mức không xảy ra vụ va chạm bus_bypass nào (0 hits &rarr; kiểu unseen). Theo nguyên tắc chứng nhận xác suất thống kê bảo thủ, một kiểu có 0 va chạm trên mẫu n = 400 chỉ chứng minh được cận trên cỡ 3/(0.2&middot;n) = 15/400 = 0.0375. Do đó fail_hi hợp lệ bắt buộc phải cộng dồn lượng phạt bảo thủ này. Muốn chứng minh con số nhỏ hơn 10⁻³ thì cần mẫu kiểm thử tới 15.000 kịch bản.</p>
+      </div>
+
+      <div class="qa-box">
+        <h4>5. Tại sao núm chỉnh "nghe an toàn hơn" như giảm tốc độ cautionV xuống 5.0 m/s lại thất bại?</h4>
+        <p><strong>Trả lời:</strong> Khi hạ cautionV quá thấp, xe ta phanh quá chậm trước chỗ khuất khiến quãng đường di chuyển bị giảm mạnh (&gt; 20%), đồng thời tạo ra chênh lệch vận tốc quá lớn với dòng giao thông phía sau, làm tăng nguy cơ bị đâm đuôi. Thế giới giao thông luôn phản ứng lại chính sách của bạn!</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Dự án Lab 11: Scenario Forge · Track 4: CV & Robotics · Tự Động Hoàn Thiện & Trực Quan Hóa</p>
+  </footer>
+
+  <script>
+    // Tab switching
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        navBtns.forEach(b => b.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const tabId = btn.dataset.tab;
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Accordion
+    function toggleTodo(header) {
+      const item = header.parentElement;
+      item.classList.toggle('open');
+    }
+
+    // Sandbox 1: TTC Calculator
+    function calcTTC() {
+      const lon = parseFloat(document.getElementById('sb1-lon').value);
+      const dv = parseFloat(document.getElementById('sb1-dv').value);
+      document.getElementById('sb1-lon-val').textContent = lon.toFixed(1) + ' m';
+      document.getElementById('sb1-dv-val').textContent = dv.toFixed(1) + ' m/s';
+
+      const gap = Math.max(0, lon - 2.3 - 2.3);
+      document.getElementById('sb1-gap').textContent = gap.toFixed(2) + ' m';
+
+      if (dv <= 0.1) {
+        document.getElementById('sb1-ttc').textContent = '∞ (Không đuổi)';
+      } else {
+        const ttc = gap / dv;
+        document.getElementById('sb1-ttc').textContent = ttc.toFixed(2) + ' s';
+      }
+    }
+
+    // Sandbox 4: Wilson Calculator
+    function calcWilson() {
+      const k = parseInt(document.getElementById('sb4-k').value);
+      const n = parseInt(document.getElementById('sb4-n').value);
+      document.getElementById('sb4-k-val').textContent = k;
+      document.getElementById('sb4-n-val').textContent = n;
+
+      const p = k / n;
+      document.getElementById('sb4-p').textContent = p.toFixed(5);
+
+      const z = 1.96;
+      const denom = 1.0 + (z * z) / n;
+      const center = (p + (z * z) / (2.0 * n)) / denom;
+      const half = (z / denom) * Math.sqrt((p * (1.0 - p)) / n + (z * z) / (4.0 * n * n));
+      const lo = Math.max(0.0, center - half);
+      const hi = Math.min(1.0, center + half);
+
+      document.getElementById('sb4-ci').textContent = `[${lo.toFixed(5)}, ${hi.toFixed(5)}]`;
+    }
+  </script>
+</body>
+</html>
